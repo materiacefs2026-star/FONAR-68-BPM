@@ -118,7 +118,7 @@ header h1:after{
 header p{max-width:560px;font-size:14px!important;line-height:1.45}
 
 .pmmg-logo{
-  width:82px!important;height:82px!important;left:20px!important;top:20px!important;
+  width:68px!important;height:68px!important;left:20px!important;top:20px!important;
   background:#f1eee5;padding:5px;border-radius:18px!important;
   box-shadow:0 8px 25px rgba(0,0,0,.28);
   border:2px solid #b59a63;
@@ -214,7 +214,7 @@ header p{max-width:560px;font-size:14px!important;line-height:1.45}
   header{min-height:185px!important;padding:20px 16px 18px 82px!important}
   header h1{font-size:20px!important}
   header p{font-size:12px!important}
-  .pmmg-logo{width:57px!important;height:57px!important;left:11px!important;top:12px!important}
+  .pmmg-logo{width:50px!important;height:50px!important;left:11px!important;top:12px!important}
   header:after{right:12px;bottom:9px;font-size:8px}
 }
 
@@ -497,6 +497,22 @@ html, body { width:100%; max-width:100%; margin:0; padding:0; overflow-x:hidden 
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="apple-touch-icon" href="./icons/icon-192.png">
+
+<style id="correcao-cabecalho-sem-alterar-questoes">
+/* CORREÇÃO EXCLUSIVA DO ENQUADRAMENTO DO CABEÇALHO — NÃO ALTERA QUESTÕES */
+header:after{
+  right:14px!important;
+  bottom:18px!important;
+  font-size:10px!important;
+  letter-spacing:1px!important;
+  white-space:nowrap!important;
+  max-width:calc(100% - 28px)!important;
+  overflow:hidden!important;
+}
+@media(max-width:520px){
+  header:after{display:none!important;}
+}
+</style>
 </head>
 <body>
 <header>
@@ -758,7 +774,6 @@ function montar(){
  Object.values(boxes).forEach(x=>x.innerHTML='');
  perguntas.forEach((p,i)=>{
   const d=document.createElement('div'); d.className='q';
-  if(i===4) d.id='q5-apenas-uma';
   const isQ12=i===14;
   const isQ7=i===9;
   const isQ14=i===17;
@@ -767,9 +782,9 @@ function montar(){
   const isQ16=String(p[0]).startsWith('16.');
   const isQ18Real=String(p[0]).startsWith('18.');
 
-  // Q5 — ÚNICA ALTERAÇÃO: seleção obrigatória de apenas uma opção.
-  // O índice correto da Q5 no vetor é 4 (zero-based).
-  if(i===4){
+  // Q5 — seleção obrigatória de apenas uma opção.
+  // Q5 é o índice 6 do vetor (zero-based).
+  if(i===6){
     d.id='q5-travada-definitiva';
     d.innerHTML="<b>"+p[0]+"</b><div class='single-tag'>◉ Marque apenas uma opção</div><div class='opts q5-opcoes'></div>";
     const opts5=d.querySelector('.q5-opcoes');
@@ -779,11 +794,11 @@ function montar(){
       const b=document.createElement('button');
       b.type='button'; b.className='opt'; b.textContent=o;
       b.onclick=()=>{
-        atual.respostas[4]=o;
+        atual.respostas[6]=o;
         [...opts5.querySelectorAll('.opt')].forEach(x=>x.classList.remove('sel'));
         b.classList.add('sel');
       };
-      if(atual && atual.respostas && atual.respostas[4]===o) b.classList.add('sel');
+      if(atual && atual.respostas && atual.respostas[6]===o) b.classList.add('sel');
       wrap.appendChild(b);
       opts5.appendChild(wrap);
     });
@@ -952,7 +967,6 @@ function montar(){
     boxes[grupoPergunta(i)].appendChild(d); return;
   }
   d.innerHTML="<b>"+p[0]+"</b>"+(multi?"<div class='multi-tag'>☑ Pode marcar mais de uma opção</div>":"<div class='single-tag'>◉ Marque uma opção</div>")+"<div class='opts'></div>";
-  if(i===4){ d.querySelector(".multi-tag")?.remove(); d.querySelector(".single-tag").textContent="◉ Marque uma opção"; }
   if(i===13){ const st=d.querySelector(".single-tag"); if(st) st.textContent="◉ Marque apenas uma opção"; }
   const opts=d.querySelector('.opts');
   p[1].forEach(o=>{
