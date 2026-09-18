@@ -1132,6 +1132,11 @@ function ativarSelecaoPreenchimento(){
 async function salvar(){
  try{
   if(!atual||!atual.id){alert("Nenhum formulário ativo para salvar.");return false;}
+  // Garante que a opção escolhida em “Preenchimento inicial” seja gravada
+  // diretamente a partir da opção visualmente selecionada antes do salvamento.
+  const q26=document.getElementById("q26");
+  const formaSelecionada=q26?.querySelector("button[data-forma].sel");
+  if(formaSelecionada) atual.forma=formaSelecionada.getAttribute("data-forma")||"";
   const val=id=>{const e=document.getElementById(id);return e?(e.value||"").trim():"";};
   const sel=id=>{const e=document.getElementById(id);return e?(e.value||""):"";};
 
