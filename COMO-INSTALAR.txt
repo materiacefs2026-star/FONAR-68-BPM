@@ -1,0 +1,19 @@
+FONAR 68º BPM — APLICATIVO OFFLINE
+
+O pacote foi preparado como PWA (aplicativo web instalável), funcionando em Android e iPhone.
+
+IMPORTANTE: para instalar e ativar o modo offline, o aplicativo precisa ser publicado em um endereço HTTPS (por exemplo, GitHub Pages). Depois de abrir o endereço pela primeira vez com internet, instale o aplicativo na tela inicial. A partir daí, o aplicativo pode ser usado sem internet.
+
+ANDROID (Chrome):
+1. Abra o endereço HTTPS do aplicativo no Chrome.
+2. Toque nos três pontos.
+3. Escolha “Instalar aplicativo” ou “Adicionar à tela inicial”.
+4. Abra o FONAR pelo ícone instalado.
+
+IPHONE (Safari):
+1. Abra o endereço HTTPS do aplicativo no Safari.
+2. Toque em Compartilhar.
+3. Escolha “Adicionar à Tela de Início”.
+4. Abra o FONAR pelo ícone instalado.
+
+Os registros e imagens continuam sendo armazenados localmente no aparelho, conforme o funcionamento atual do programa.
