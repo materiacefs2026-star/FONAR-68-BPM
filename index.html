@@ -806,7 +806,7 @@ function formatarDataBR(d){const dd=String(d.getDate()).padStart(2,"0"),mm=Strin
 function normalizarDataBR(v){let x=String(v||"").replace(/\D/g,"").slice(0,8);if(x.length>4)return x.slice(0,2)+"/"+x.slice(2,4)+"/"+x.slice(4);if(x.length>2)return x.slice(0,2)+"/"+x.slice(2);return x;}
 
 function novo(){
- atual={id:"r_"+Date.now().toString(36)+"_"+Math.random().toString(36).slice(2,8), respostas:{}, fotosImportantes:[]};
+ atual={id:"r_"+Date.now().toString(36)+"_"+Math.random().toString(36).slice(2,8), respostas:{}, fotosImportantes:[], forma:"", preenchimentoInicial:""};
  document.getElementById("home").classList.add("hidden");
  document.getElementById("view").classList.add("hidden");
  document.getElementById("form").classList.remove("hidden");document.getElementById("fotosUnicas").style.display="block";
@@ -1109,20 +1109,33 @@ function montar(){
  });
  abrirAbaPerguntas('historico');
  const f=document.getElementById('q25'); f.innerHTML=''; ["Declaro que as informações fornecidas são verídicas e foram prestadas por mim.","Não confirmado"].forEach(o=>{const b=document.createElement('button');b.className='opt';b.textContent=o;b.onclick=()=>{atual.declaracao=o;[...f.children].forEach(x=>x.classList.remove('sel'));b.classList.add('sel')};f.appendChild(b)});
- const g=document.getElementById('q26'); [...g.querySelectorAll('[data-forma]')].forEach(b=>{const o=b.dataset.forma;b.onclick=()=>{atual.forma=o;[...g.children].forEach(x=>x.classList.remove('sel'));b.classList.add('sel')};if(atual.forma===o)b.classList.add('sel')});
+ const g=document.getElementById('q26'); if(g) restaurarPreenchimentoInicial();
 }
 
-// Correção exclusiva do salvamento/restauração do Preenchimento inicial.
-// A seleção continua visualmente igual, mas agora é explicitamente capturada
-// no salvamento e restaurada ao abrir um formulário já salvo.
+// Preenchimento inicial: fonte única de verdade + persistência imediata.
+// A opção é guardada no registro como "preenchimentoInicial" e também em
+// "forma" para manter compatibilidade com registros antigos.
 function restaurarPreenchimentoInicial(){
   const g=document.getElementById('q26');
   if(!g) return;
-  const valor=atual && typeof atual.forma==='string' ? atual.forma : '';
+  const valor=atual && typeof atual==='object'
+    ? (atual.preenchimentoInicial || atual.forma || '')
+    : '';
   g.querySelectorAll('button[data-forma]').forEach(b=>{
-    b.classList.toggle('sel', !!valor && b.getAttribute('data-forma')===valor);
+    b.classList.toggle('sel', b.getAttribute('data-forma')===valor && !!valor);
   });
 }
+
+async function persistirPreenchimentoInicial(){
+  try{
+    if(atual && atual.id && atual.vitima && window.fonarStorage){
+      await window.fonarStorage.putRegistro(atual);
+    }
+  }catch(e){
+    console.error('Erro ao persistir Preenchimento inicial:',e);
+  }
+}
+
 function ativarSelecaoPreenchimento(){
   const g=document.getElementById('q26');
   if(!g) return;
@@ -1131,9 +1144,16 @@ function ativarSelecaoPreenchimento(){
     b.onclick=function(ev){
       ev.preventDefault();
       ev.stopPropagation();
+      const valor=this.getAttribute('data-forma')||'';
       g.querySelectorAll('button[data-forma]').forEach(x=>x.classList.remove('sel'));
       this.classList.add('sel');
-      if(typeof atual==='object') atual.forma=this.getAttribute('data-forma')||'';
+      if(typeof atual==='object'){
+        atual.forma=valor;
+        atual.preenchimentoInicial=valor;
+      }
+      // Se o registro já existe e possui vítima, grava imediatamente.
+      // Assim a opção não se perde mesmo se o aplicativo for fechado logo depois.
+      persistirPreenchimentoInicial();
     };
   });
   restaurarPreenchimentoInicial();
@@ -1151,6 +1171,7 @@ async function salvar(){
   atual.forma=formaSelecionada
     ? (formaSelecionada.getAttribute("data-forma")||"")
     : (typeof atual.forma==="string" ? atual.forma : "");
+  atual.preenchimentoInicial=atual.forma;
   const val=id=>{const e=document.getElementById(id);return e?(e.value||"").trim():"";};
   const sel=id=>{const e=document.getElementById(id);return e?(e.value||""):"";};
 
@@ -1305,7 +1326,7 @@ const dataInicial=document.getElementById("data"); if(dataInicial)dataInicial.on
 </script>
 <script>
 if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost")) {
-  navigator.serviceWorker.register("./service-worker.js").catch(()=>{});
+  navigator.serviceWorker.register("./service-worker.js",{updateViaCache:'none'}).catch(()=>{});
 }
 </script>
 </div>
