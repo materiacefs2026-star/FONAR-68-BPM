@@ -1112,22 +1112,32 @@ function montar(){
  const g=document.getElementById('q26'); [...g.querySelectorAll('[data-forma]')].forEach(b=>{const o=b.dataset.forma;b.onclick=()=>{atual.forma=o;[...g.children].forEach(x=>x.classList.remove('sel'));b.classList.add('sel')};if(atual.forma===o)b.classList.add('sel')});
 }
 
-// Correção robusta da seleção do Preenchimento inicial
+// Correção exclusiva do salvamento/restauração do Preenchimento inicial.
+// A seleção continua visualmente igual, mas agora é explicitamente capturada
+// no salvamento e restaurada ao abrir um formulário já salvo.
+function restaurarPreenchimentoInicial(){
+  const g=document.getElementById('q26');
+  if(!g) return;
+  const valor=atual && typeof atual.forma==='string' ? atual.forma : '';
+  g.querySelectorAll('button[data-forma]').forEach(b=>{
+    b.classList.toggle('sel', !!valor && b.getAttribute('data-forma')===valor);
+  });
+}
 function ativarSelecaoPreenchimento(){
   const g=document.getElementById('q26');
   if(!g) return;
   g.querySelectorAll('button[data-forma]').forEach(b=>{
     b.type='button';
-    b.addEventListener('click',function(ev){
+    b.onclick=function(ev){
       ev.preventDefault();
       ev.stopPropagation();
       g.querySelectorAll('button[data-forma]').forEach(x=>x.classList.remove('sel'));
       this.classList.add('sel');
-      if(typeof atual==='object') atual.forma=this.getAttribute('data-forma');
-    },true);
+      if(typeof atual==='object') atual.forma=this.getAttribute('data-forma')||'';
+    };
   });
+  restaurarPreenchimentoInicial();
 }
-
 
 async function salvar(){
  try{
@@ -1136,7 +1146,11 @@ async function salvar(){
   // diretamente a partir da opção visualmente selecionada antes do salvamento.
   const q26=document.getElementById("q26");
   const formaSelecionada=q26?.querySelector("button[data-forma].sel");
-  if(formaSelecionada) atual.forma=formaSelecionada.getAttribute("data-forma")||"";
+  // Captura a opção visualmente marcada; se não houver uma marca visual,
+  // preserva a escolha já registrada no objeto atual.
+  atual.forma=formaSelecionada
+    ? (formaSelecionada.getAttribute("data-forma")||"")
+    : (typeof atual.forma==="string" ? atual.forma : "");
   const val=id=>{const e=document.getElementById(id);return e?(e.value||"").trim():"";};
   const sel=id=>{const e=document.getElementById(id);return e?(e.value||""):"";};
 
@@ -1213,6 +1227,8 @@ async function abrir(id){
  preencher(qv,"vitima_");preencher(qa,"autor_");
  renderTestemunhas(atual.testemunhas||[]);
  montar();
+ // Restaura explicitamente o Preenchimento inicial do registro carregado.
+ restaurarPreenchimentoInicial();
  if(typeof renderFotosUnicas==="function")renderFotosUnicas();
 
  try{document.activeElement && document.activeElement.blur();}catch(e){}
